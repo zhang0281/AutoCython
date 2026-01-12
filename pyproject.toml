@@ -3,9 +3,9 @@ requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "AutoCython-jianjun"
-version = "2.1.0"
-authors = [{name = "jianjun", email = "910667956@qq.com"}]
+name = "AutoCython-zhang"
+dynamic = ["version"]
+authors = [{name = "zhang_gavin", email = "qq814608@163.com"}]
 description = "自动Cython，使用Cython批量编译.py文件为.pyd文件！"
 readme = "README.md"
 license = {file = "LICENSE"}
@@ -22,9 +22,12 @@ dependencies = [
 ]
 
 [project.urls]
-homepage = "https://github.com/EVA-JianJun/AutoCython"
-repository = "https://github.com/EVA-JianJun/AutoCython"
-documentation = "https://github.com/EVA-JianJun/AutoCython#readme"
+homepage = "https://github.com/zhang0281/AutoCython"
+repository = "https://github.com/zhang0281/AutoCython"
+documentation = "https://github.com/zhang0281/AutoCython#readme"
 
 [project.scripts]
 AutoCython = "AutoCython:main"
+
+[tool.setuptools.dynamic]
+version = {attr = "AutoCython._version.__version__"}

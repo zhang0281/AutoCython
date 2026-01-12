@@ -11,7 +11,7 @@
 
 ## 📦 Installation
 ```bash
-pip install -U AutoCython-jianjun
+pip install -U AutoCython-zhang
 ```
 
 ## ⚙️ Dependencies

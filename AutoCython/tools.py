@@ -3,7 +3,7 @@ import sys
 import locale
 import argparse
 
-__version__ = "2.1.0"
+from ._version import __version__
 
 def get_system_language():
     """

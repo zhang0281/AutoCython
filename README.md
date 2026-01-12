@@ -11,7 +11,7 @@
 
 ## 📦 安装
 ```bash
-pip install -U AutoCython-jianjun
+pip install -U AutoCython-zhang
 ```
 
 ## ⚙️ 依赖环境
