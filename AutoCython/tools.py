@@ -5,11 +5,17 @@ import argparse
 
 def find_python_files(path):
     """
-    查找指定路径下的所有子孙py文件，不包括 __init__.py, 排除头两行包含"# AucoCython No Compile"的文件
+    查找指定路径下的所有子孙py文件，不包括 __init__.py, 排除头两行包含"# AutoCython No Compile"的文件
 
     :param path: 要搜索的根目录路径
     :return: 符合条件的py文件路径列表
     """
+    # 排除标记（兼容旧版本拼写错误）
+    exclude_markers = ["# AutoCython No Compile", "# AucoCython No Compile"]
+
+    def has_exclude_marker(line):
+        return any(marker in line for marker in exclude_markers)
+
     valid_py_files = []
 
     for root, dirs, files in os.walk(path):
@@ -26,7 +32,7 @@ def find_python_files(path):
                         line2 = f.readline()
 
                         # 检查是否包含排除标记
-                        if "# AucoCython No Compile" not in line1 and "# AucoCython No Compile" not in line2:
+                        if not has_exclude_marker(line1) and not has_exclude_marker(line2):
                             valid_py_files.append(filepath)
                 except UnicodeDecodeError:
                     # 如果utf-8解码失败，尝试其他编码
@@ -35,7 +41,7 @@ def find_python_files(path):
                             line1 = f.readline()
                             line2 = f.readline()
 
-                            if "# AucoCython No Compile" not in line1 and "# AucoCython No Compile" not in line2:
+                            if not has_exclude_marker(line1) and not has_exclude_marker(line2):
                                 valid_py_files.append(filepath)
                     except Exception as e:
                         print(f"无法读取文件 {filepath}: {e}")

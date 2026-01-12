@@ -55,6 +55,11 @@ from Cython.Build import cythonize
 # 编译器指令
 compiler_directives = {{
     'language_level': '3',
+    'annotation_typing': False,
+    'always_allow_keywords': True,
+    'binding': True,
+    'embedsignature': True,
+    'wraparound': False,
 }}
 
 setup(
