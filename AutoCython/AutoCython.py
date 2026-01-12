@@ -2,7 +2,7 @@ import os
 from .run_tasks import run_tasks
 from .compile import compile_to_binary
 from .tools import parse_arguments, find_python_files
-from .tools import show_path_not_find_file, show_file_find_file, show_path_find_file
+from .tools import show_no_compilable_files, show_file_not_found, show_path_not_found
 
 def compile():
     args = parse_arguments()
@@ -17,7 +17,7 @@ def compile():
             ]
             run_tasks(tasks, max_workers=1) # 执行编译
         else:
-            show_file_find_file(args.file)
+            show_file_not_found(args.file)
     elif args.path:
         if os.path.exists(args.path) and not os.path.isfile(args.path):
             compile_file_list = find_python_files(args.path)
@@ -31,6 +31,6 @@ def compile():
                     )
                 run_tasks(tasks, max_workers=args.conc) # 执行编译
             else:
-                show_path_not_find_file(args.path)
+                show_no_compilable_files(args.path)
         else:
-            show_path_find_file(args.path)
+            show_path_not_found(args.path)

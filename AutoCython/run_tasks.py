@@ -1,3 +1,4 @@
+import os
 import time
 import locale
 import platform
@@ -10,6 +11,22 @@ from rich.console import Console
 from rich.spinner import Spinner
 from rich.columns import Columns
 from rich.progress import Progress, BarColumn, TimeRemainingColumn, TimeElapsedColumn
+
+def get_system_language():
+    """
+    获取系统语言，兼容 Python 3.11+
+
+    :return: 'zh' 或 'en'
+    """
+    try:
+        # Python 3.11+ 推荐方式
+        lang = locale.getlocale()[0]
+        if lang is None:
+            # 回退到环境变量
+            lang = os.environ.get('LANG', os.environ.get('LANGUAGE', ''))
+        return 'zh' if lang and lang.startswith('zh') else 'en'
+    except Exception:
+        return 'en'
 
 def run_tasks(task_list, max_workers=2, language=None):
     """
@@ -30,11 +47,7 @@ def run_tasks(task_list, max_workers=2, language=None):
     print(f"{platform.system()} {platform.version()} {platform.machine()} | {platform.python_implementation()} {platform.python_version()} {platform.python_compiler()} | {bit_architecture}")
 
     # 获取系统默认区域设置
-    try:
-        sys_language, _ = locale.getdefaultlocale()
-        language = 'zh' if sys_language and sys_language.startswith('zh') else 'en'
-    except Exception:
-        language = 'en'  # 异常时默认英文
+    language = get_system_language()
 
     # 中英文文本映射
     TEXT_MAP = {
@@ -87,6 +100,7 @@ def run_tasks(task_list, max_workers=2, language=None):
     console = Console()
     start_time = time.time()
     completed = 0
+    completed_lock = threading.Lock()  # 保护 completed 变量的锁
     total_tasks = len(task_list)
 
     # 创建任务状态数据
@@ -143,7 +157,8 @@ def run_tasks(task_list, max_workers=2, language=None):
                 refresh_event.set()  # 触发刷新
 
         nonlocal completed
-        completed += 1
+        with completed_lock:
+            completed += 1
         progress.update(overall_task, advance=1)
         refresh_event.set()  # 触发刷新
         return task
@@ -153,13 +168,20 @@ def run_tasks(task_list, max_workers=2, language=None):
         # 创建总状态面板
         total_panel = Table.grid(padding=1)
         elapsed_time = time.time() - start_time
-        if completed > 0:
-            remaining_time = (elapsed_time / (completed + 0.001)) * (total_tasks - completed) if completed < total_tasks else 0
+        if completed > 0 and completed < total_tasks:
+            remaining_time = (elapsed_time / completed) * (total_tasks - completed)
             total_panel.add_row(
                 Text(t['total_tasks'], style="bold") + Text(f"{total_tasks}", style="bold cyan") + Text(" |") +
                 Text(t['completed'], style="bold") + Text(f"{completed}/{total_tasks}", style="bold cyan") + Text(" |") +
                 Text(t['elapsed'], style="bold") + Text(f"{elapsed_time:.2f}s", style="bold green") + Text(" |") +
                 Text(t['remaining'], style="bold") + Text(f"{remaining_time:.2f}s\n", style="bold yellow")
+            )
+        elif completed >= total_tasks:
+            total_panel.add_row(
+                Text(t['total_tasks'], style="bold") + Text(f"{total_tasks}", style="bold cyan") + Text(" |") +
+                Text(t['completed'], style="bold") + Text(f"{completed}/{total_tasks}", style="bold cyan") + Text(" |") +
+                Text(t['elapsed'], style="bold") + Text(f"{elapsed_time:.2f}s", style="bold green") + Text(" |") +
+                Text(t['remaining'], style="bold") + Text("0.00s\n", style="bold yellow")
             )
         else:
             total_panel.add_row(

@@ -64,7 +64,7 @@ compiler_directives = {{
 
 setup(
     ext_modules=cythonize(
-        "{file_name}",
+        {repr(file_name)},
         compiler_directives=compiler_directives,
         force=True
     )
@@ -85,7 +85,7 @@ setup(
 
         if result.returncode != 0:
             error_msg = result.stderr.decode('utf-8', errors='replace')
-            raise RuntimeError(f"RuntimeError: {error_msg}")
+            raise RuntimeError(f"Compilation failed: {error_msg}")
 
         # 查找生成的二进制文件
         pattern = os.path.join(temp_dir, f"{module_name}*{target_ext}")

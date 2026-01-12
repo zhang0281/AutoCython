@@ -3,6 +3,24 @@ import sys
 import locale
 import argparse
 
+__version__ = "2.1.0"
+
+def get_system_language():
+    """
+    获取系统语言，兼容 Python 3.11+
+
+    :return: 'zh' 或 'en'
+    """
+    try:
+        # Python 3.11+ 推荐方式
+        lang = locale.getlocale()[0]
+        if lang is None:
+            # 回退到环境变量
+            lang = os.environ.get('LANG', os.environ.get('LANGUAGE', ''))
+        return 'zh' if lang and lang.startswith('zh') else 'en'
+    except Exception:
+        return 'en'
+
 def find_python_files(path):
     """
     查找指定路径下的所有子孙py文件，不包括 __init__.py, 排除头两行包含"# AutoCython No Compile"的文件
@@ -52,11 +70,7 @@ def find_python_files(path):
 
 def parse_arguments():
     # 获取系统语言
-    try:
-        sys_language, _ = locale.getdefaultlocale()
-        lang = 'zh' if sys_language and sys_language.startswith('zh') else 'en'
-    except Exception:
-        lang = 'en'  # 异常时默认英文
+    lang = get_system_language()
 
     # 中英文帮助信息配置
     help_messages = {
@@ -68,7 +82,7 @@ def parse_arguments():
             'del_help': 'Remove source code after compilation (default: False)',
             'help_help': 'Show help message',
             'version_help': 'Show program version',
-            'version_text': 'v2.1.0',
+            'version_text': f'v{__version__}',
             'required_error': 'The following arguments are required: {}',
             'epilog': 'Example:\n   AutoCython -f demo.py\n   AutoCython -p path'
         },
@@ -80,7 +94,7 @@ def parse_arguments():
             'del_help': '编译后删除源代码（默认：False）',
             'help_help': '显示帮助信息',
             'version_help': '显示程序版本',
-            'version_text': 'v2.1.0',
+            'version_text': f'v{__version__}',
             'required_error': '缺少必要参数: {}',
             'epilog': '示例:\n   AutoCython -f demo.py\n   AutoCython -p path'
         }
@@ -111,7 +125,7 @@ def parse_arguments():
 
     optional_group = parser.add_argument_group('optional arguments')
     optional_group.add_argument('-c', '--conc', type=int, default=2, help=msg['conc_help'])
-    optional_group.add_argument('-d', '--del', dest='del_source', type=bool, default=False, help=msg['del_help'])
+    optional_group.add_argument('-d', '--del', dest='del_source', action='store_true', help=msg['del_help'])
     optional_group.add_argument('-h', '--help', action='store_true', help=msg['help_help'])
     optional_group.add_argument('-v', '--version', action='store_true', help=msg['version_help'])
 
@@ -133,36 +147,24 @@ def parse_arguments():
 
     return args
 
-def show_path_not_find_file(path):
-    try:
-        sys_language, _ = locale.getdefaultlocale()
-        lang = 'zh' if sys_language and sys_language.startswith('zh') else 'en'
-    except Exception:
-        lang = 'en'  # 异常时默认英文
+def show_no_compilable_files(path):
+    lang = get_system_language()
 
     if lang == 'zh':
         print(f"{path} 目录下没有任何需要编译的文件!")
     else:
         print(f"The {path} directory does not contain any files that need to be compiled!")
 
-def show_file_find_file(file):
-    try:
-        sys_language, _ = locale.getdefaultlocale()
-        lang = 'zh' if sys_language and sys_language.startswith('zh') else 'en'
-    except Exception:
-        lang = 'en'  # 异常时默认英文
+def show_file_not_found(file):
+    lang = get_system_language()
 
     if lang == 'zh':
         print(f"文件 {file} 不存在!")
     else:
         print(f"File {file} does not exist!")
 
-def show_path_find_file(path):
-    try:
-        sys_language, _ = locale.getdefaultlocale()
-        lang = 'zh' if sys_language and sys_language.startswith('zh') else 'en'
-    except Exception:
-        lang = 'en'  # 异常时默认英文
+def show_path_not_found(path):
+    lang = get_system_language()
 
     if lang == 'zh':
         print(f"路径 {path} 不存在!")

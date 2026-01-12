@@ -1,4 +1,4 @@
-#!/use/bin/dev python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from .AutoCython import compile
 
